@@ -1,0 +1,11 @@
+<div class="panel">
+  <div class="individual-stuff" ng-controller="SingleStuffCtrl as thingCtrl">
+    <h4>{{thingCtrl.thing.title}}</h4>
+    <p>{{thingCtrl.thing.cost | currency}}</p>
+    <img ng-src={{thingCtrl.thing.picture}}>
+    <p>{{thingCtrl.thing.description}}</p>
+    <p>Location: {{thingCtrl.thing.location}}</p>
+    <a ng-href="/#/appusers/{{thingCtrl.thing.selling_user_id}}">Seller</a>
+    <button ng-click="thingCtrl.test()">Click me to contact!</button>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+<div class="panel">
+  <div class="stuff-page" ng-controller="StuffListCtrl as stuffs">
+    <h3>Stuff</h3>
+    <div ng-repeat="thing in (orderedItems = (stuffs.stuffList | orderBy:'created':true))">
+      <a ng-href="/#/listedstuff/{{thing.id}}">{{thing.title}}</a>
+      <p>{{thing.cost | currency}}</p>
+      <img ng-src={{thing.picture}}>
+      <p>{{thing.description}}</p>
+      <p>Location: {{thing.location}}</p>
+      <p>Sold by: {{thing.owner.name}}</p>
+    </div>
+  </div>
+</div>

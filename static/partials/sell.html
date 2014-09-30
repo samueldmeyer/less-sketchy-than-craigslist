@@ -1,0 +1,9 @@
+<div class="panel">
+    <form name="sellForm" ng-controller="sellFormController as sellCtrl" ng-submit="sellCtrl.addItem()">
+		<p><input type="text" placeholder="Title" ng-model="sellCtrl.sell.title" required></p>
+		<p><input type="number" step="0.01" placeholder="Cost" ng-model="sellCtrl.sell.cost" required></p>
+		<p><input type="text" placeholder="location" ng-model="sellCtrl.sell.location"></p>
+		<p><textarea ng-model="sellCtrl.sell.description" placeholder="describe what you are selling here"></textarea></p>
+		<input type="submit">
+    </form>
+</div>

@@ -1,0 +1,18 @@
+<div class="panel">
+  <div ng-controller="SinglePersonCtrl as personCtrl">
+  <!--<p>{{personCtrl.person}}</p>-->
+    <h4>{{personCtrl.person.display_name}}</h4>
+    <p>Rating: {{personCtrl.person.rating | number:1}}</p>
+  
+    <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)">
+      <select ng-model="ratingCtrl.review.rating">
+        <option value="1">1 star</option> 
+        <option value="2">2 star</option> 
+        <option value="3">3 star</option> 
+        <option value="4">4 star</option> 
+        <option value="5">5 star</option> 
+      </select>
+      <input type="submit">
+    </form>
+  </div>
+</div>

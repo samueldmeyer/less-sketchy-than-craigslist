@@ -60,10 +60,10 @@ var app = angular.module('lessSketchy', [
   'ngRoute', 
   'lstc.items', 
   'lstc.users']
-  )
+  );
 
 
-.controller('HeaderCtrl', ['$location', function($location) {
+app.controller('HeaderController', ['$location', function($location) {
   this.menuIsOpen = false;
   this.toggleMenu = function() {
     this.menuIsOpen = !this.menuIsOpen;
@@ -75,6 +75,24 @@ var app = angular.module('lessSketchy', [
     return viewLocation === $location.path();
   }
 }])
+
+app.directive('appHeader', function(){
+  return {
+    restrict: 'E',
+    templateUrl: '/static/partials/app-header.html',
+    controller: ['$location', function($location) {
+      this.menuIsOpen = false;
+      this.toggleMenu = function() {
+        this.menuIsOpen = !this.menuIsOpen;
+      };
+      this.isActive = function(viewLocation) {
+        //tests if a view is active
+        return viewLocation === $location.path();
+      }
+    }],
+    controllerAs: 'header'
+  }
+});
 
 app.config(['$routeProvider',
   function($routeProvider) {
@@ -96,7 +114,7 @@ app.config(['$routeProvider',
       }).
       when('/appusers/:user_id', {
         templateUrl: '/static/partials/user-detail.html',
-        controller: 'SinglePersonCtrl'
+        controller: 'SinglePersonController'
       }).
       otherwise({
         redirectTo: '/'

@@ -1,5 +1,5 @@
 <div class="panel">
-  <div ng-controller="SinglePersonCtrl as personCtrl">
+  <div ng-controller="SinglePersonController as personCtrl">
     <h4>{{personCtrl.person.display_name}}</h4>
     <p>Rating: {{(personCtrl.person.rating | number:1) || "No rating yet"}}</p>
   

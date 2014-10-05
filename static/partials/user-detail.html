@@ -1,8 +1,7 @@
 <div class="panel">
   <div ng-controller="SinglePersonCtrl as personCtrl">
-  <!--<p>{{personCtrl.person}}</p>-->
     <h4>{{personCtrl.person.display_name}}</h4>
-    <p>Rating: {{personCtrl.person.rating | number:1}}</p>
+    <p>Rating: {{(personCtrl.person.rating | number:1) || "No rating yet"}}</p>
   
     <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)">
       <select ng-model="ratingCtrl.review.rating">

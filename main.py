@@ -10,10 +10,6 @@ from google.appengine.ext import ndb
 from google.appengine.api import memcache
 from google.appengine.api import users
 
-# template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-# jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
-#                                autoescape = True)
-
 secret = 'fasd@#$%@#$%234523452'
 
 def render_str(template, **params):
@@ -194,8 +190,6 @@ class ItemListHandler(BaseHandler):
             returned_results = 100
             results = SellItem.query().fetch(returned_results)
             result_list = [result.to_dict(exclude=['created']) for result in results]
-            logging.error(len(result_list))
-            logging.error(len(results))
             for i in xrange(0, len(result_list)):
                 result_list[i]['id'] = results[i].key.id()
                 result_list[i]['created'] = (results[i].created-datetime.datetime(1970,1,1)).total_seconds()
@@ -212,17 +206,18 @@ class ItemListHandler(BaseHandler):
             title = body['title']
             cost = float(body['cost'])
             logging.error(cost)
-            selling_user_id = app_user.key.id()
-            logging.error(type(selling_user_id))
+            selling_app_user_id = app_user.key.id()
+            logging.error(type(selling_app_user_id))
             description = body['description']
             location = body['location']
 
             new_item = SellItem(title=title, cost=cost, 
-                selling_user_id=selling_user_id, location=location,
+                selling_app_user_id=selling_app_user_id, location=location,
                 description=description)
             key = new_item.put()
-            body['id'] = new_item.key.id()
-            self.render_json(body)
+            output = new_item.to_dict(exclude=['created'])
+            output['id'] = new_item.key.id()
+            self.render_json(output)
         else:
             self.error(403)
 
@@ -258,30 +253,6 @@ class UserHandler(BaseHandler):
         output = app_user.to_dict(exclude=['created', 'rating_list.created', 'user_id'])
         output['id'] = app_user.key.id()
         self.render_json(output)
-
-# class UserCreationHandler(BaseHandler):
-#     def get(self):
-#         user = users.get_current_user()
-#         app_user = AppUser.register(name = user.nickname(), email=user.email(), user_id=user.user_id())
-#         output = app_user.to_dict(exclude=['created'])
-#         # Convert created date to seconds
-#         output['created'] = (app_user.created - datetime.datetime(1970,1,1)).total_seconds()
-#         self.render_json(output)
-
-# class AddReviewHandler(BaseHandler):
-#     def post(self, user_id_hash):
-#         user = users.get_current_user()
-#         app_user = AppUser.by_user_object(user)
-#         body = json.loads(self.request.body)
-#         target_user = User.by_user_hash(user_id_hash)
-#         new_review = UserReview(
-#             rating = body['rating'],
-#             review_text = body['review_text'],
-#             source_user_id = app_user.user_id_hash)
-#         app_user.add_review(new_review)
-#         app_user.put()
-#         output = new_review.to_dict(exclude = ['created'])
-#         self.render_json(output)
 
 app = webapp2.WSGIApplication([('/', MainAppHandler),
                                ('/logout', MyHandler),

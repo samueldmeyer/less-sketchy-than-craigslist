@@ -2,15 +2,7 @@
 angular.module('lstc.items', [])
 // Services
 .factory('ItemsApi', ['$resource', function($resource){
-  var fac = $resource('/items/:id', {id: '@id'}, {});
-  fac.createInstance = function(args) {
-    function F() {
-      return fac.apply(this, args);
-    }
-    F.prototype = fac.prototype;
-    return new F();
-  };
-  return fac;
+  return $resource('/items/:id', {id: '@id'}, {});
 }])
 .factory('Items', ['$filter', 'ItemsApi', function($filter, ItemsApi){
   var fac = {}
@@ -25,12 +17,12 @@ angular.module('lstc.items', [])
 
   fac.addItem = function(item, success) {
     //success is a function that accepts an item returned from the server as input
-    newItem = ItemsApi.createInstance([item]);
+    // newItem = ItemsApi.createInstance([item]);
     var addToListAndSuccess = function (item) {
       fac.all.push(item);
-      success(item);
+      (success || angular.noop)(item);
     }
-    newItem.$save(addToListAndSuccess);
+    ItemsApi.save(item, addToListAndSuccess);
   }
 
   return fac;

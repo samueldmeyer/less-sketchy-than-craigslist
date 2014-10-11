@@ -1,9 +1,9 @@
-<div class="panel">
-  <div ng-controller="SinglePersonController as personCtrl">
+<div class="container">
+  <div ng-show="personCtrl.person.display_name">
     <h4>{{personCtrl.person.display_name}}</h4>
     <p>Rating: {{(personCtrl.person.rating | number:1) || "No rating yet"}}</p>
   
-    <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)">
+    <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)" ng-disabled="ratingCtrl.formDisabled">
       <select ng-model="ratingCtrl.review.rating">
         <option value="1">1 star</option> 
         <option value="2">2 star</option> 
@@ -11,7 +11,8 @@
         <option value="4">4 star</option> 
         <option value="5">5 star</option> 
       </select>
-      <input type="submit">
+      <input type="submit" ng-disabled="ratingCtrl.formDisabled">
+      <p ng-show="ratingCtrl.submitDisabled">Thanks for your feedback!</p>
     </form>
   </div>
 </div>

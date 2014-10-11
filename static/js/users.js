@@ -1,23 +1,28 @@
 angular.module('lstc.users', [])
-.controller('SinglePersonController', ['$resource', '$routeParams', function ($resource, $routeParams) {
-  var Person = $resource('/users/:id', {id: '@id'})
-  this.person = Person.get({id: $routeParams.user_id})
+.factory('ReviewApi', ['$resource', function($resource) {
+  return $resource('/users/:app_user_id/reviews/:review_id', {app_user_id: '@app_user_id'});
 }])
-.controller('ratingFormController', ['$resource', function($resource){
+.controller('SinglePersonController', ['$resource', '$routeParams', function ($resource, $routeParams) {
+  var Person = $resource('/users/:id', {id: '@id'});
+  this.person = Person.get({id: $routeParams.user_id});
+}])
+.controller('ratingFormController', ['$resource', 'ReviewApi', function($resource, ReviewApi){
   this.review = {};
-  var Rating = $resource('/users/:app_user_id/reviews/:review_id', {app_user_id: '@app_user_id'});
+  this.submitDisabled = false;
+
   this.addRating = function(user) {
     //save rating and recalculate average rating
-    var newRating = new Rating(this.review);
-    newRating.app_user_id = user.id;
-    newRating.$save(function(review) {
+    this.submitDisabled = true;
+    this.review.app_user_id = user.id;
+
+    var ctrl = this;
+    ReviewApi.save(this.review, function(review) {
       var ratingListLength = user.rating_list.length;
       user.rating = 
         (user.rating * ratingListLength + parseInt(review.rating)) / 
         (ratingListLength + 1);
-      user.rating_list.push(review)
-      this.review = {};
+      user.rating_list.push(review);
+      ctrl.review = {};
     });
-
   };
 }]);

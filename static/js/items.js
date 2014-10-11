@@ -5,21 +5,31 @@ angular.module('lstc.items', [])
   return $resource('/items/:id', {id: '@id'}, {});
 }])
 .factory('Items', ['$filter', 'ItemsApi', function($filter, ItemsApi){
-  var fac = {}
-  fac.currentItem = { };
+  var fac = {};
+  fac.currentItem = {};
 
   fac.all = ItemsApi.query();
 
+  fac.fullItems = [];
+
   fac.setCurrent = function(id) {
-    // Sets item based on item id
-    this.currentItem = ItemsApi.get({id: id});
+    // Sets item based on item id if not already done
+    if ($filter('filter')(fac.fullItems, {id: id})[0] !== this.currentItem) {
+      angular.copy($filter('filter')(fac.fullItems, {id: id})[0], this.currentItem);
+    }
+    // If item is not in the current list in memory, get from server
+    if (!this.currentItem.id) {
+      this.currentItem = ItemsApi.get({id: id});
+      this.fullItems.push(this.currentItem);
+    }
   };
 
   fac.addItem = function(item, success) {
-    //success is a function that accepts an item returned from the server as input
+    //success is an optional function that accepts an item returned from the server as input
     // newItem = ItemsApi.createInstance([item]);
     var addToListAndSuccess = function (item) {
       fac.all.push(item);
+      fac.fullItems.push(item);
       (success || angular.noop)(item);
     }
     ItemsApi.save(item, addToListAndSuccess);
@@ -33,18 +43,21 @@ angular.module('lstc.items', [])
 // Controllers
 .controller('AllItemsController', ['Items', function (Items) {
   this.items = Items.all;
-  // this.activate = function(id) {
-  //   items.setThing(id);
-  // };
 }])
 .controller('SingleItemController', ['Items', '$routeParams', function (Items, $routeParams) {
-  Items.setCurrent($routeParams.itemId);
-  this.item = Items.currentItem;
+  this.item = {};
+
+  this.init = function() {
+    Items.setCurrent($routeParams.itemId);
+    this.item = Items.currentItem;
+  };
+
   this.emailTab = function() {
-    // open email in a new tab
-    console.log("clicked");
-    window.open("mailto:" + this.item.email + "?subject=" + this.item.title);
-  }
+    // open email in a new tab/window
+    window.open("mailto:" + encodeURIComponent(this.item.email) + "?subject=" + encodeURIComponent(this.item.title));
+  };
+
+  this.init();
 }])
 .controller('sellFormController', ['Items', '$location', function(Items, $location){
   this.sell = {};

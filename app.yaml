@@ -17,3 +17,13 @@ libraries:
 
 - name: PIL
   version: "1.1.7"
+
+skip_files:
+- ^(.*/)?#.*#$
+- ^(.*/)?.*~$
+- ^(.*/)?.*\.py[co]$
+- ^(.*/)?.*/RCS/.*$
+- ^(.*/)?\..*$
+- ^.*/?bower_components/.*$
+- ^node_modules/.*$
+- ^test/.*$

@@ -217,6 +217,7 @@ class ItemListHandler(BaseHandler):
             key = new_item.put()
             output = new_item.to_dict(exclude=['created'])
             output['id'] = new_item.key.id()
+            output['email'] = app_user.email
             self.render_json(output)
         else:
             self.error(403)
@@ -240,14 +241,18 @@ class ReviewListHandler(BaseHandler):
         app_user = AppUser.by_user_object(user)
         body = json.loads(self.request.body)
         target_user = AppUser.get_by_id(target_app_user_id)
-        new_review = UserReview(
-            rating = int(body['rating']),
-            review_text = body.get('review_text', ''),
-            source_user_id = app_user.key.id())
-        app_user.add_review(new_review)
-        app_user.put()
-        output = new_review.to_dict(exclude = ['created'])
-        self.render_json(output)
+        if app_user.user_id == target_user.user_id:
+            # Users may not review themself
+            self.error(403)
+        else:
+            new_review = UserReview(
+                rating = int(body['rating']),
+                review_text = body.get('review_text', ''),
+                source_user_id = app_user.key.id())
+            app_user.add_review(new_review)
+            app_user.put()
+            output = new_review.to_dict(exclude = ['created'])
+            self.render_json(output)
 
 class UserHandler(BaseHandler):
     def get(self, app_user_id):

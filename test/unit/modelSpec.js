@@ -60,6 +60,7 @@ describe('Items', function() {
 
     Items.addItem(newItem, foo.functionToCall);
     expect(Items.all.length).toBe(2);
+    expect(Items.fullItems.length).toBe(1);
     expect(Items.all[1].title).toBe("The Base");
     expect(Items.all[1].id).toBe("16");
     expect(foo.functionToCall).toHaveBeenCalled();

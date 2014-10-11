@@ -1,3 +1,6 @@
 *.pyc
 static/css/bootstrap*
-
+node_modules/*
+npm-debug.log
+bower_components/*
+static/bower_components/*

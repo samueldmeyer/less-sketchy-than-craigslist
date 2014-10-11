@@ -1,25 +1,31 @@
 // This module includes all controllers and services for items, including displaying and adding
 angular.module('lstc.items', [])
 // Services
-.factory('Items', ['$filter', '$resource', function($filter, $resource){
+.factory('ItemsApi', ['$resource', function($resource){
+  var fac = $resource('/items/:id', {id: '@id'}, {});
+  fac.createInstance = function(args) {
+    function F() {
+      return fac.apply(this, args);
+    }
+    F.prototype = fac.prototype;
+    return new F();
+  };
+  return fac;
+}])
+.factory('Items', ['$filter', 'ItemsApi', function($filter, ItemsApi){
   var fac = {}
-  var SellItem = $resource('/items/:id', {id: '@id'}, {});
   fac.currentItem = { };
 
-  fac.all = SellItem.query();
+  fac.all = ItemsApi.query();
 
   fac.setCurrent = function(id) {
-  // Sets item based on item id
-    angular.copy($filter('filter')(fac.all, {id: id})[0], this.currentItem);
-    // If item is not in the current list in memory, get from server
-    if (!this.currentItem.id) {
-      this.currentItem = SellItem.get({id: id});
-    }
+    // Sets item based on item id
+    this.currentItem = ItemsApi.get({id: id});
   };
 
   fac.addItem = function(item, success) {
-    //success is a function that takes an item as an input
-    newItem = new SellItem(item);
+    //success is a function that accepts an item returned from the server as input
+    newItem = ItemsApi.createInstance([item]);
     var addToListAndSuccess = function (item) {
       fac.all.push(item);
       success(item);
@@ -29,15 +35,6 @@ angular.module('lstc.items', [])
 
   return fac;
 }])
-// .factory('AllItems', ['$filter', '$resource', function($filter, $resource) {
-//   //Controls both the list of items and single items
-//   var fac = {};
-//   var SellItemList = $resource('/items');
-
-  
-
-//   return fac; 
-// }])
 
 
 
@@ -51,6 +48,11 @@ angular.module('lstc.items', [])
 .controller('SingleItemController', ['Items', '$routeParams', function (Items, $routeParams) {
   Items.setCurrent($routeParams.itemId);
   this.item = Items.currentItem;
+  this.emailTab = function() {
+    // open email in a new tab
+    console.log("clicked");
+    window.open("mailto:" + this.item.email + "?subject=" + this.item.title);
+  }
 }])
 .controller('sellFormController', ['Items', '$location', function(Items, $location){
   this.sell = {};

@@ -55,7 +55,7 @@ people = [
 ]
 
 
-var app = angular.module('lessSketchy', [
+var app = angular.module('lessSketchyThanCraigslist', [
   'ngResource', 
   'ngRoute', 
   'lstc.items', 

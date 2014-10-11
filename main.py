@@ -227,6 +227,8 @@ class ItemHandler(BaseHandler):
         if user:
             result = SellItem.get_by_id(int(item_id))
             output = result.to_dict(exclude=['created'])
+            app_user = AppUser.by_user_object(user)
+            output['email'] = app_user.email
             output['id'] = item_id
             self.render_json(output)
         else:

@@ -5,7 +5,8 @@
     <img ng-src={{itemCtrl.item.picture}}>
     <p>{{itemCtrl.item.description}}</p>
     <p>Location: {{itemCtrl.item.location}}</p>
-    <a ng-href="/#/appusers/{{itemCtrl.item.selling_app_user_id}}">Seller</a>
-    <button ng-click="itemCtrl.test()">Click me to contact!</button>
+    <a ng-href="/#/appusers/{{itemCtrl.item.selling_app_user_id}}">Learn more about the seller</a>
+    <br>
+    <button ng-click="itemCtrl.emailTab()">Click to contact!</button>
   </div>
 </div>

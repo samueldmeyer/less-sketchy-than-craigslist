@@ -123,8 +123,10 @@ class MainAppHandler(BaseHandler):
         if user:
             self.write(open('index.html', 'r').read())
         else:
-            self.write('<a href="%s">Sign in or register</a>.' %
-                        users.create_login_url('/'))
+            self.write(open('front.html', 'r').read() %
+                users.create_login_url('/'))
+            #self.write('<a href="%s">Sign in or register</a>.' %
+             #           users.create_login_url('/'))
 
 class MyHandler(webapp2.RequestHandler):
     def get(self):

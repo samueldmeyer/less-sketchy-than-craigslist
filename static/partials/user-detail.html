@@ -1,17 +1,18 @@
-<div class="container">
-  <div ng-show="personCtrl.person.display_name">
-    <h4>{{personCtrl.person.display_name}}</h4>
-    <p>Rating: {{(personCtrl.person.rating | number:1) || "No rating yet"}}</p>
+<div class="container" id="user-detail">
+  <div ng-show="personCtrl.person.display_name" class="col-sm-offset-2 col-sm-6">
+    <h2>{{personCtrl.person.display_name}}</h2>
+    <p class="lead">Rating: {{(personCtrl.person.rating | number:1) || "No rating yet"}}</p>
   
-    <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)" ng-disabled="ratingCtrl.formDisabled">
-      <select ng-model="ratingCtrl.review.rating">
+    <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)" ng-disabled="ratingCtrl.formDisabled" class="form-horizontal" role="form">
+      <select ng-model="ratingCtrl.review.rating" class="form-control" required>
+        <option disabled value="">Add a review here</option>
         <option value="1">1 star</option> 
         <option value="2">2 star</option> 
         <option value="3">3 star</option> 
         <option value="4">4 star</option> 
         <option value="5">5 star</option> 
       </select>
-      <input type="submit" ng-disabled="ratingCtrl.formDisabled">
+      <button type="submit" class="btn btn-primary" ng-disabled="ratingCtrl.submitDisabled">Add your rating</button>
       <p ng-show="ratingCtrl.submitDisabled">Thanks for your feedback!</p>
     </form>
   </div>

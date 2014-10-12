@@ -1,12 +1,12 @@
 <div class="container">
-  <div class="individual-stuff" ng-controller="SingleItemController as itemCtrl">
-    <h4>{{itemCtrl.item.title}}</h4>
+  <div class="individual-stuff col-sm-offset-2 col-sm-8">
+    <h2>{{itemCtrl.item.title}}</h4>
     <p>{{itemCtrl.item.cost | currency}}</p>
-    <img ng-src={{itemCtrl.item.picture}}>
+    <!--<img ng-src={{itemCtrl.item.picture}}>-->
     <p>{{itemCtrl.item.description}}</p>
-    <p>Location: {{itemCtrl.item.location}}</p>
-    <a ng-href="/#/appusers/{{itemCtrl.item.selling_app_user_id}}">Learn more about the seller</a>
     <br>
-    <button ng-click="itemCtrl.emailTab()">Click to contact!</button>
+    <p><strong>Location:</strong> <br><address> {{itemCtrl.item.location}}</address></p>
+    <button class="btn btn-primary" ng-click="itemCtrl.emailTab()">Contact</button>
+    <a ng-href="/#/appusers/{{itemCtrl.item.selling_app_user_id}}" class="btn btn-info">Learn more about the seller</a>
   </div>
 </div>

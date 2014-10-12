@@ -59,7 +59,7 @@ angular.module('lstc.items', [])
 
   this.init();
 }])
-.controller('sellFormController', ['Items', '$location', function(Items, $location){
+.controller('SellFormController', ['Items', '$location', function(Items, $location){
   this.sell = {};
 
   this.addItem = function() {

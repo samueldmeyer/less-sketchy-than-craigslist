@@ -30,11 +30,11 @@ describe('SingleItemController', function() {
   }));
 });
 
-describe('sellFormController', function() {
+describe('SellFormController', function() {
   beforeEach(module('lessSketchyThanCraigslist'));
 
   it('should add new items to the list and redirect', inject(function($controller, ItemsApi, $location) {
-    var ctrl = $controller('sellFormController');
+    var ctrl = $controller('SellFormController');
     spyOn($location, "path");
 
     spyOn(ItemsApi, "save").and.callFake(function(input, success) {

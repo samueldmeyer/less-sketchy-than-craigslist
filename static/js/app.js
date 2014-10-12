@@ -8,8 +8,6 @@
   ]);
 
 
-
-
 app.config(['$routeProvider',
   function($routeProvider) {
     $routeProvider.
@@ -18,15 +16,18 @@ app.config(['$routeProvider',
       }).
       when('/listedstuff', {
         templateUrl: '/static/partials/item-list.html',
-        controller: 'AllItemsController'
+        controller: 'AllItemsController',
+        controllerAs: 'allItemsCtrl'
       }).
       when('/listedstuff/:itemId', {
         templateUrl: '/static/partials/item-detail.html',
-        controller: 'SingleItemController'
+        controller: 'SingleItemController',
+        controllerAs: 'itemCtrl'
       }).
       when('/sell', {
         templateUrl: '/static/partials/sell.html',
-        controller: 'sellFormController'
+        controller: 'SellFormController',
+        controllerAs: 'sellCtrl'
       }).
       when('/appusers/:user_id', {
         templateUrl: '/static/partials/user-detail.html',

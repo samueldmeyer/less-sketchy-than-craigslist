@@ -1,28 +1,14 @@
 import json
 import webapp2
 import logging
-import random
-import hashlib
 import datetime
-from string import letters
 
 from google.appengine.ext import ndb
-from google.appengine.api import memcache
 from google.appengine.api import users
-
-secret = 'fasd@#$%@#$%234523452'
 
 def render_str(template, **params):
     t = jinja_env.get_template(template)
     return t.render(params)
-
-def make_secure_val(val):
-    return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
-
-def check_secure_val(secure_val):
-    val = secure_val.split('|')[0]
-    if secure_val == make_secure_val(val):
-        return val
 
 class BaseHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -42,10 +28,6 @@ class BaseHandler(webapp2.RequestHandler):
     def read_secure_cookie(self, name):
         cookie_val = self.request.cookies.get(name)
         return cookie_val and check_secure_val(cookie_val)
-    def login(self, user):
-        self.set_secure_cookie('user_id', str(user.key().id()))
-    def logout(self):
-        self.response.headers.add_header('Set-Cookie', 'user_id=; Path=/')
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
@@ -56,7 +38,7 @@ class BaseHandler(webapp2.RequestHandler):
         else:
            self.format = 'html'
 
-##### Other models
+##### models
 
 class SellItem(ndb.Model):
     title = ndb.StringProperty(required = True)
@@ -73,27 +55,6 @@ class UserReview(ndb.Model):
     # created = ndb.DateTimeProperty(auto_now_add = True)
 
 
-##########
-
-##### user stuff
-def make_salt(length = 5):
-    return ''.join(random.choice(letters) for x in xrange(length))
-
-def make_pw_hash(name, pw, salt = None):
-    if not salt:
-        salt = make_salt()
-    h = hashlib.sha256(name + pw + salt).hexdigest()
-    return '%s,%s' % (salt, h)
-
-def make_user_hash(user_id):
-    return hashlib.sha256(user_id + secret).hexdigest()
-
-def valid_pw(name, password, h):
-    salt = h.split(',')[0]
-    return h == make_pw_hash(name, password, salt)
-
-def users_key(group = 'default'):
-    return ndb.Key.from_path('users', group)
 
 class AppUser(ndb.Model):
     display_name = ndb.StringProperty()
@@ -109,11 +70,6 @@ class AppUser(ndb.Model):
         logging.error(name)
         logging.error("test")
         u = AppUser.query(AppUser.display_name == name).get()
-        return u
-
-    @classmethod
-    def by_user_hash(cls, name):
-        u = AppUser.query(AppUser.user_id_hash == name).get()
         return u
 
     @classmethod
@@ -139,27 +95,26 @@ class AppUser(ndb.Model):
     @classmethod
     def by_user_object(cls, user):
         """gets an app_user from a Google ID user"""
-        return AppUser.by_user_id(user.user_id())
+        app_user = AppUser.by_user_id(user.user_id())
+        if app_user is None:
+                app_user = AppUser.register(name = user.nickname(), email=user.email(), user_id=user.user_id())
+        return app_user
 
     def add_review(self, user_review):
-        user = users.get_current_user()
-        app_user = AppUser.by_user_object(user)
-        current_num_reviews = len(app_user.rating_list)
-        app_user.rating_list.append(user_review)
-        if (app_user.rating is None) or (current_num_reviews < 1):
-            app_user.rating = user_review.rating
+        current_num_reviews = len(self.rating_list)
+        self.rating_list.append(user_review)
+        if (self.rating is None) or (current_num_reviews < 1):
+            self.rating = user_review.rating
         else:
-            app_user.rating = (app_user.rating * current_num_reviews + 
+            self.rating = (self.rating * current_num_reviews + 
                 user_review.rating) / (current_num_reviews + 1)
-        app_user.put()
+        self.put()
         # output = new_review.to_dict(exclude = ['created'])
         # self.render_json(output)
 
+def users_key(group = 'default'):
+    return ndb.Key.from_path('users', group)
 
-# UserReview(
-#             rating = 5,
-#             review_text = "Good person.",
-#             source_user_id = app_user.user_id_hash)
 ################################
 
 class MainAppHandler(BaseHandler):
@@ -197,17 +152,14 @@ class ItemListHandler(BaseHandler):
         else:
             self.error(403)
     def post(self):
+        # Usually sent by sell page
         user = users.get_current_user()
         if user:
             app_user = AppUser.by_user_object(user)
-            if app_user is None:
-                app_user = AppUser.register(name = user.nickname(), email=user.email(), user_id=user.user_id())
             body = json.loads(self.request.body)
             title = body['title']
             cost = float(body['cost'])
-            logging.error(cost)
             selling_app_user_id = app_user.key.id()
-            logging.error(type(selling_app_user_id))
             description = body['description']
             location = body['location']
 
@@ -228,7 +180,7 @@ class ItemHandler(BaseHandler):
         if user:
             result = SellItem.get_by_id(int(item_id))
             output = result.to_dict(exclude=['created'])
-            app_user = AppUser.by_user_object(user)
+            app_user = AppUser.get_by_id(result.selling_app_user_id)
             output['email'] = app_user.email
             output['id'] = item_id
             self.render_json(output)
@@ -240,7 +192,7 @@ class ReviewListHandler(BaseHandler):
         user = users.get_current_user()
         app_user = AppUser.by_user_object(user)
         body = json.loads(self.request.body)
-        target_user = AppUser.get_by_id(target_app_user_id)
+        target_user = AppUser.get_by_id(int(target_app_user_id))
         if app_user.user_id == target_user.user_id:
             # Users may not review themself
             self.error(403)
@@ -249,8 +201,8 @@ class ReviewListHandler(BaseHandler):
                 rating = int(body['rating']),
                 review_text = body.get('review_text', ''),
                 source_user_id = app_user.key.id())
-            app_user.add_review(new_review)
-            app_user.put()
+            target_user.add_review(new_review)
+            target_user.put()
             output = new_review.to_dict(exclude = ['created'])
             self.render_json(output)
 

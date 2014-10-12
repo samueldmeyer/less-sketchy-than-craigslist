@@ -9,7 +9,7 @@
       </button>
       <a class="navbar-brand" href="/#/">Less Sketchy than Craigslist</a>
     </div>
-    <div class="collapse navbar-collapse ng-class: {'in': header.menuIsOpen}">
+    <div class="collapse navbar-collapse ng-class: {'in': header.menuIsOpen}" ng-click="header.toggleMenu()">
       <ul class="nav navbar-nav">
         <li ng-class="{active: header.isActive('/')}">
           <a href="/#/">Home</a></li>

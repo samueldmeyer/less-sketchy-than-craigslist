@@ -6,37 +6,7 @@ import datetime
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-def render_str(template, **params):
-    t = jinja_env.get_template(template)
-    return t.render(params)
 
-class BaseHandler(webapp2.RequestHandler):
-    def write(self, *a, **kw):
-        self.response.out.write(*a, **kw)
-    def render_json(self, d):
-        json_txt = json.dumps(d)
-        self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
-        self.write(json_txt)
-    def write_debug(self, *a, **kw):
-        self.response.write(*a, **kw)
-        self.response.headers['Content-Type'] = 'text/plain'
-    def set_secure_cookie(self, name, val):
-        cookie_val = make_secure_val(val)
-        self.response.headers.add_header(
-            'Set-Cookie',
-            '%s=%s; Path=/' % (name, cookie_val))
-    def read_secure_cookie(self, name):
-        cookie_val = self.request.cookies.get(name)
-        return cookie_val and check_secure_val(cookie_val)
-    def initialize(self, *a, **kw):
-        webapp2.RequestHandler.initialize(self, *a, **kw)
-        uid = self.read_secure_cookie('user_id')
-        self.user = uid and User.by_id(int(uid))
-
-        if self.request.url.endswith('.json'):
-           self.format = 'json'
-        else:
-           self.format = 'html'
 
 ##### models
 
@@ -52,8 +22,16 @@ class UserReview(ndb.Model):
     rating = ndb.IntegerProperty()
     review_text = ndb.TextProperty()
     source_user_id = ndb.IntegerProperty()
-    # created = ndb.DateTimeProperty(auto_now_add = True)
+    created = ndb.DateTimeProperty(auto_now_add = True)
 
+    def to_dict_w_created(self, exclude = None):
+        if exclude == None:
+            exclude = ['created']
+        else:
+            exclude = exclude.append('created')
+        output = self.to_dict(exclude = exclude)
+        output['created'] = get_date_in_milliseconds(self.created)
+        return output
 
 
 class AppUser(ndb.Model):
@@ -66,9 +44,6 @@ class AppUser(ndb.Model):
 
     @classmethod
     def by_name(cls, name):
-        logging.error("test")
-        logging.error(name)
-        logging.error("test")
         u = AppUser.query(AppUser.display_name == name).get()
         return u
 
@@ -112,10 +87,41 @@ class AppUser(ndb.Model):
         # output = new_review.to_dict(exclude = ['created'])
         # self.render_json(output)
 
-def users_key(group = 'default'):
-    return ndb.Key.from_path('users', group)
-
 ################################
+
+def get_date_in_milliseconds(date):
+    """ Converts a DateTimeProperty to milliseconds """
+    return (date - datetime.datetime(1970,1,1)).total_seconds() * 1000
+
+# Request Handlers
+
+class BaseHandler(webapp2.RequestHandler):
+    def write(self, *a, **kw):
+        self.response.out.write(*a, **kw)
+    def render_json(self, d):
+        json_txt = json.dumps(d)
+        self.response.headers['Content-Type'] = 'application/json; charset=UTF-8'
+        self.write(json_txt)
+    def write_debug(self, *a, **kw):
+        self.response.write(*a, **kw)
+        self.response.headers['Content-Type'] = 'text/plain'
+    def set_secure_cookie(self, name, val):
+        cookie_val = make_secure_val(val)
+        self.response.headers.add_header(
+            'Set-Cookie',
+            '%s=%s; Path=/' % (name, cookie_val))
+    def read_secure_cookie(self, name):
+        cookie_val = self.request.cookies.get(name)
+        return cookie_val and check_secure_val(cookie_val)
+    def initialize(self, *a, **kw):
+        webapp2.RequestHandler.initialize(self, *a, **kw)
+        uid = self.read_secure_cookie('user_id')
+        self.user = uid and User.by_id(int(uid))
+
+        if self.request.url.endswith('.json'):
+           self.format = 'json'
+        else:
+           self.format = 'html'
 
 class MainAppHandler(BaseHandler):
     def get(self):
@@ -149,7 +155,7 @@ class ItemListHandler(BaseHandler):
             result_list = [result.to_dict(exclude=['created']) for result in results]
             for i in xrange(0, len(result_list)):
                 result_list[i]['id'] = results[i].key.id()
-                result_list[i]['created'] = (results[i].created-datetime.datetime(1970,1,1)).total_seconds()
+                result_list[i]['created'] = get_date_in_milliseconds(results[i].created)
             self.render_json(result_list)
         else:
             self.error(403)
@@ -195,24 +201,33 @@ class ReviewListHandler(BaseHandler):
         app_user = AppUser.by_user_object(user)
         body = json.loads(self.request.body)
         target_user = AppUser.get_by_id(int(target_app_user_id))
-        if app_user.user_id == target_user.user_id:
-            # Users may not review themself
+        rating = int(body['rating'])
+
+        # A user may not review himself
+        if app_user.user_id == target_user.user_id:    
             self.error(403)
+            self.write("You cannot review yourself.")
+        
+        # Ratings must be between 1 and 5
+        elif rating > 5 or rating < 1:
+            self.error(400)
+
         else:
             new_review = UserReview(
-                rating = int(body['rating']),
+                rating = rating,
                 review_text = body.get('review_text', ''),
                 source_user_id = app_user.key.id())
             target_user.add_review(new_review)
             target_user.put()
-            output = new_review.to_dict(exclude = ['created'])
+            output = new_review.to_dict_w_created()
             self.render_json(output)
 
 class UserHandler(BaseHandler):
     def get(self, app_user_id):
         app_user = AppUser.get_by_id(int(app_user_id))
-        output = app_user.to_dict(exclude=['created', 'rating_list.created', 'user_id'])
+        output = app_user.to_dict(exclude=['created', 'rating_list', 'user_id'])
         output['id'] = app_user.key.id()
+        output['rating_list'] = [rating.to_dict_w_created() for rating in app_user.rating_list]
         self.render_json(output)
 
 app = webapp2.WSGIApplication([('/', MainAppHandler),

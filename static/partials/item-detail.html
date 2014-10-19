@@ -3,9 +3,9 @@
     <h2>{{itemCtrl.item.title}}</h4>
     <p>{{itemCtrl.item.cost | currency}}</p>
     <!--<img ng-src={{itemCtrl.item.picture}}>-->
-    <p>{{itemCtrl.item.description}}</p>
+    <p class="preserve-nl">{{itemCtrl.item.description}}</p>
     <br>
-    <p><strong>Location:</strong> <br><address> {{itemCtrl.item.location}}</address></p>
+    <p><strong>Location:</strong> <br><address class="preserve-nl"> {{itemCtrl.item.location}}</address></p>
     <button class="btn btn-primary" ng-click="itemCtrl.emailTab()">Contact</button>
     <a ng-href="/#/appusers/{{itemCtrl.item.selling_app_user_id}}" class="btn btn-info">Learn more about the seller</a>
   </div>

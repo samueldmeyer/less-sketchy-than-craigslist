@@ -9,11 +9,14 @@
   }]);
   app.controller('ratingFormController', ['$resource', 'ReviewApi', function($resource, ReviewApi){
     this.review = {};
-    this.submitDisabled = false;
+    this.formDisabled = false;
+    this.formSubmitError = false;
+    this.formErrorMessage = '';
 
     this.addRating = function(user) {
       //save rating and recalculate average rating
-      this.submitDisabled = true;
+      this.formDisabled = true;
+      this.formSubmitError = false;
       this.review.app_user_id = user.id;
 
       var ctrl = this;
@@ -24,6 +27,11 @@
           (ratingListLength + 1);
         user.rating_list.push(review);
         ctrl.review = {};
+      }, function(err) {
+        console.log(err);
+        ctrl.formDisabled = false;
+        ctrl.formSubmitError = true;
+        ctrl.formErrorMessage = err.data;
       });
     };
   }]);

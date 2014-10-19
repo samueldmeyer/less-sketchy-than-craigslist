@@ -111,6 +111,7 @@ describe('ratingFormController', function() {
         source_user_id: 345234
       }]);
     expect(user.rating).toEqual(3);
+    expect(ctrl.formDisabled).toBeTruthy();
   }));
 });
 

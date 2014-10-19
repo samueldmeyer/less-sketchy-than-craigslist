@@ -2,7 +2,7 @@
  * Base structure
  */
 
-/* Move down content because we have a fixed navbar that is 50px tall */
+ /* Move down content because we have a fixed navbar that is 50px tall */
 body {
   padding-top: 50px;
 }
@@ -16,10 +16,6 @@ body {
   margin-top: 15px;
 }
 
-/*
- * Global add-ons
- */
-
 .sub-header {
   padding-bottom: 10px;
   border-bottom: 1px solid #eee;
@@ -31,6 +27,14 @@ body {
  */
 .navbar-fixed-top {
   border: 0;
+}
+
+/*
+ * class for preserving newlines
+ */
+
+.preserve-nl {
+  white-space: pre-line
 }
 
 /*

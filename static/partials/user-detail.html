@@ -2,18 +2,39 @@
   <div ng-show="personCtrl.person.display_name" class="col-sm-offset-2 col-sm-6">
     <h2>{{personCtrl.person.display_name}}</h2>
     <p class="lead">Rating: {{(personCtrl.person.rating | number:1) || "No rating yet"}}</p>
-  
-    <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)" ng-disabled="ratingCtrl.formDisabled" class="form-horizontal" role="form">
-      <select ng-model="ratingCtrl.review.rating" class="form-control" required>
-        <option disabled value="">Add a review here</option>
-        <option value="1">1 star</option> 
-        <option value="2">2 star</option> 
-        <option value="3">3 star</option> 
-        <option value="4">4 star</option> 
-        <option value="5">5 star</option> 
-      </select>
-      <button type="submit" class="btn btn-primary" ng-disabled="ratingCtrl.submitDisabled">Add your rating</button>
-      <p ng-show="ratingCtrl.submitDisabled">Thanks for your feedback!</p>
+    <div id="review-list">
+      <h3>Reviews</h3>
+      <p ng-hide="personCtrl.person.rating_list">No reviews yet. You can be the first to review!</p>
+      <hr>
+      <div ng-repeat="review in personCtrl.person.rating_list">
+        <p>Rating: <strong>{{review.rating}}</strong></p>
+        <p> <i>{{review.created | date:'longDate'}}</i></p>
+        <p class="preserve-nl">{{review.review_text}}</p>
+        <hr>
+      </div>
+    </div>
+    <form name="ratingForm" ng-controller="ratingFormController as ratingCtrl" ng-submit="ratingCtrl.addRating(personCtrl.person)" class="form-horizontal" role="form">
+      <p ng-show="ratingCtrl.formDisabled">Thanks for your feedback!</p>
+      <div>
+        <select ng-model="ratingCtrl.review.rating" class="form-control col-sm-6" ng-disabled="ratingCtrl.formDisabled" required>
+          <option disabled value="">Add a rating here</option>
+          <option value="1">1 star</option> 
+          <option value="2">2 star</option> 
+          <option value="3">3 star</option> 
+          <option value="4">4 star</option> 
+          <option value="5">5 star</option> 
+        </select>
+      </div>
+      <br><br>
+      <label for="review-text" class="sr-only">Review Text</label>
+      <div>
+        <textarea rows="5" id="review-text" placeholder="Leave a review here" class="form-control" ng-model="ratingCtrl.review.review_text" ng-disabled="ratingCtrl.formDisabled" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" ng-disabled="ratingCtrl.formDisabled">Add your review</button>
+      <br><br>
+      <p ng-show="ratingCtrl.formSubmitError">Sorry, we had some trouble saving your review. {{ratingCtrl.formErrorMessage}}</p>
+      <p ng-show="ratingCtrl.review.rating">Rating: <strong>{{ratingCtrl.review.rating}}</strong></p>
+      <p class="preserve-nl">{{ratingCtrl.review.review_text}}</p>
     </form>
   </div>
 </div>

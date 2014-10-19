@@ -3,9 +3,16 @@
     <h2>{{itemCtrl.item.title}}</h4>
     <p>{{itemCtrl.item.cost | currency}}</p>
     <!--<img ng-src={{itemCtrl.item.picture}}>-->
-    <p>{{itemCtrl.item.description}}</p>
+    <p class="preserve-nl">{{itemCtrl.item.description}}</p>
     <br>
-    <p><strong>Location:</strong> <br><address> {{itemCtrl.item.location}}</address></p>
+    <p><strong>Location:</strong> </p>
+    <address class="preserve-nl"> {{itemCtrl.item.location}}</address>
+    <p><strong>Seller rating:</strong></p>
+    <p ng-hide="itemCtrl.item.seller_rating_length">User has no reviews yet</p>
+    <p ng-show="itemCtrl.item.seller_rating_length">
+        {{itemCtrl.item.seller_rating | number: 1}} stars 
+        ({{itemCtrl.item.seller_rating_length}} review<span ng-show="itemCtrl.item.seller_rating_length > 1">s</span>)
+    </p>
     <button class="btn btn-primary" ng-click="itemCtrl.emailTab()">Contact</button>
     <a ng-href="/#/appusers/{{itemCtrl.item.selling_app_user_id}}" class="btn btn-info">Learn more about the seller</a>
   </div>

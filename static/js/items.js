@@ -55,7 +55,8 @@
 
     this.emailTab = function() {
       // open email in a new tab/window
-      window.open("mailto:" + encodeURIComponent(this.item.email) + "?subject=" + encodeURIComponent(this.item.title));
+      window.open('mailto:' + encodeURIComponent(this.item.email) + 
+        '?subject=' + encodeURIComponent(this.item.title));
     };
 
     this.init();
@@ -67,7 +68,7 @@
       var ctrl = this;
       Items.addItem(this.sell, function(item) {
         ctrl.sell = {};
-        $location.path( "/listedstuff/" + item.id );
+        $location.path( '/listedstuff/' + item.id );
       });
     };
     
